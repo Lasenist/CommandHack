@@ -1,13 +1,15 @@
 package main;
 
 import org.newdawn.slick.util.Log;
-import views.CommandTextGrid;
+import views.commandprompt.viewmodel.CommandPromptViewModel;
+import views.commandprompt.CommandPrompt;
 import views.Window;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
+import views.commandprompt.CommandPromptController;
 import views.util.InputNotifier;
 import views.util.ShaderProgram;
 
@@ -21,7 +23,7 @@ public class Game extends BasicGameState
     public static final int ID = 2;
 
     private Window window;
-    private CommandTextGrid commandTextGrid;
+    private Window window2;
 
     private boolean supported;
     private ShaderProgram program;
@@ -34,11 +36,21 @@ public class Game extends BasicGameState
     {
         gc.getInput().addMouseListener( Application.MOUSE_CURSOR );
         gc.getInput().enableKeyRepeat();
-        gc.getInput().addKeyListener( InputNotifier.getInputNotifier() );
+        gc.getInput().addKeyListener( InputNotifier
+                .getInputNotifier() );
 
-        this.commandTextGrid = new CommandTextGrid();
-        //InputNotifier.getInputNotifier().subscribe( this.commandTextGrid );
-        this.window = new Window( this.commandTextGrid );
+
+        CommandPromptViewModel commandPromptViewModel = new CommandPromptViewModel();
+        CommandPromptController commandPromptController = new CommandPromptController( commandPromptViewModel );
+        commandPromptViewModel.addObserver( commandPromptController );
+        CommandPrompt commandPrompt = new CommandPrompt( commandPromptController );
+        this.window = new Window( commandPrompt, 50, 50 );
+
+        CommandPromptViewModel commandPromptViewModel2 = new CommandPromptViewModel();
+        CommandPromptController commandPromptController2 = new CommandPromptController( commandPromptViewModel2 );
+        commandPromptViewModel2.addObserver( commandPromptController2 );
+        CommandPrompt commandPrompt2 = new CommandPrompt( commandPromptController2 );
+        this.window2 = new Window( commandPrompt2, 100, 100 );
 
 
         supported = ShaderProgram.isSupported();
@@ -92,6 +104,7 @@ public class Game extends BasicGameState
     {
         Application.MOUSE_CURSOR.render( g );
         this.window.render( g );
+        this.window2.render( g );
     }
 
     // update-method with all the magic happening in it
@@ -99,7 +112,7 @@ public class Game extends BasicGameState
     public void update( GameContainer gc, StateBasedGame sbg, int arg2 ) throws SlickException
     {
         this.window.update();
-        //InputNotifier.getInputNotifier().setInput( gc.getInput() );
+        this.window2.update();
     }
 
     // Returning 'ID' from class 'Game'

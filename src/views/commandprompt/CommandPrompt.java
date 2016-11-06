@@ -1,4 +1,4 @@
-package views;
+package views.commandprompt;
 
 import main.Application;
 import org.newdawn.slick.*;
@@ -6,6 +6,8 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
+import views.Window;
+import views.commandprompt.interfaces.ICommandPromptController;
 import views.mouse.IScrollListener;
 import views.util.Fonts;
 import views.util.ShapeUtil;
@@ -13,13 +15,16 @@ import views.util.ShapeUtil;
 
 import javax.swing.*;
 import java.util.ArrayList;
-
 /**
  * Created by Lasen on 02/10/16.
  * Creates a grid of characters.
  */
-public class CommandTextGrid implements Window.IWindowContent, IScrollListener, IFontGridView, KeyListener
+public class CommandPrompt implements
+        Window.IWindowContent, IScrollListener, KeyListener
 {
+    private ICommandPromptController
+            commandPromptController;
+
     private UnicodeFont font;
     private int charHeight;
     private int charWidth;
@@ -35,27 +40,16 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
     private boolean isListeningToMouseScroll;
     private int outputScrollOffset;
 
-    private ArrayList<String> outputText;
-
-    private String inputText;
-    private String inputPrefix;
     private int cursorOffset;
     private int inputTextOffset;
 
     private boolean drawCursor;
 
-    public CommandTextGrid() throws SlickException
+    private final int VERTICAL_MARGIN = 4;
+
+    public CommandPrompt( ICommandPromptController commandPromptController ) throws SlickException
     {
-        this.outputText = new ArrayList<>(  );
-        this.inputPrefix = "lasen@127.0.0.1$";
-        this.inputText = "";
-
-        this.outputText.add( "Kernel start...." );
-        this.outputText.add( "Initialising system...." );
-        this.outputText.add( "Reticulating splines..." );
-        this.outputText.add( "Connecting to network..." );
-        this.outputText.add( "Some text to show this scrolling text actuall works" );
-
+        this.commandPromptController = commandPromptController;
 
         boolean canFitGridInWindow = false;
         int sizeOffset = 0;
@@ -63,7 +57,7 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
         {
             UnicodeFont unicodefont = Fonts.GetMonospacedFont(14 + sizeOffset);
 
-            if (  width % unicodefont.getWidth( "a" ) == 0 && height % unicodefont.getHeight( "a" ) == 0 )
+            if (  width % unicodefont.getWidth( "a" ) == 0 && height % (unicodefont.getHeight( "a" ) + VERTICAL_MARGIN )== 0 )
             {
                 canFitGridInWindow = true;
                 font = unicodefont;
@@ -75,14 +69,16 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
         cursorBlinkTimer.setRepeats( true );
         cursorBlinkTimer.start();
 
-        System.out.println( 14 + sizeOffset );
+        System.out.println(
+                14 +
+                        sizeOffset );
     }
 
 
     public void render( Graphics g )
     {
         renderOutputText();
-        renderInputTextRow(g);
+        renderInputTextRow( g );
     }
 
     private boolean isInsideOutputTextArea(final float x, final float y)
@@ -99,17 +95,18 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
 
     private void renderOutputText()
     {
+        final ArrayList<String> outputList = commandPromptController.getOutputList();
+
         for ( int x = 0; x < gridWidth; x++ )
         {
-            for ( int y = 0; y < gridHeight; y++ )
+            for ( int y = 0; y < outputList.size(); y++ )
             {
                 String line = "";
-                if(outputText.size() > y)
-                    line = outputText.get( y );
+                if( outputList.size() > y)
+                    line = outputList.get( y );
                 String character = "";
                 if(x < line.length())
                     character = String.valueOf( line.toCharArray()[x] );
-
 
                 final float actualX = this.x + ( x * charWidth );
                 final float actualY = this.y + ( y * charHeight ) + ( outputScrollOffset * charHeight );
@@ -122,7 +119,10 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
 
     private void renderInputTextRow(Graphics g)
     {
-        final String bottomRow = inputPrefix + inputText;
+        final String inputPrefix = commandPromptController.getInputPrefix();
+        final String inputText = commandPromptController.getInputText();
+
+        final String bottomRow =  inputPrefix + inputText;
 
         for( int x = 0 ; x < bottomRow.length() + 1; x++)
         {
@@ -163,10 +163,17 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
 
     public void update()
     {
+        commandPromptController.update();
+
+        final String inputText = commandPromptController.getInputText();
+
         this.charWidth = font.getWidth( "a" );
-        this.charHeight = font.getHeight( "a" );
+        this.charHeight = font.getHeight( "a" ) + VERTICAL_MARGIN;
         this.gridWidth = width / charWidth;
         this.gridHeight = (height / charHeight) - 1;
+
+        if(cursorOffset > inputText.length())
+            cursorOffset = 0;
 
         if( ShapeUtil.isContaineeInsideContainer( new Rectangle( this.x, this.y, this.width, this.height ),
                 Application.MOUSE_CURSOR.mouseHitbox))
@@ -189,6 +196,9 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
 
     private void incrementCursorOffset()
     {
+        final String inputText = commandPromptController.getInputText();
+        final String inputPrefix = commandPromptController.getInputPrefix();
+
         if(cursorOffset < inputText.length() - inputTextOffset && cursorOffset < gridWidth - inputPrefix.length())
         {
             cursorOffset++;
@@ -226,26 +236,46 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
 
     public void keyPressed( int key, char c )
     {
-        if( Character.isLetterOrDigit( c ) || c == ' ')
-        {
-            String beforeCursor = inputText.substring( 0, cursorOffset + inputTextOffset );
-            String afterCursor = cursorOffset < inputText.length() ?
-                    inputText.substring( cursorOffset + inputTextOffset, inputText.length() ) : "";
+        final String inputText = commandPromptController.getInputText();
+        final String inputPrefix = commandPromptController.getInputPrefix();
+        final ArrayList<String> outputText = commandPromptController.getOutputList();
 
-            inputText =  beforeCursor + c + afterCursor;
+        if( Character.isLetterOrDigit( c ) || key == Input.KEY_SPACE)
+        {
+            String beforeCursor = inputText.substring( 0,
+                    cursorOffset +
+                            inputTextOffset );
+            String afterCursor = cursorOffset < inputText.length() ?
+                    inputText.substring(
+                            cursorOffset +
+                                    inputTextOffset, inputText
+                            .length() ) : "";
+
+            commandPromptController.setInputText(
+                    beforeCursor +
+                            c +
+                            afterCursor );
             incrementCursorOffset();
         }
         else if(key == Input.KEY_BACK)
         {
-            if(this.inputText.length() > 0)
+            if(inputText.length() > 0)
             {
                 if(cursorOffset > 0)
                 {
-                    String beforeCursor = inputText.substring( 0, cursorOffset + inputTextOffset - 1 );
+                    String beforeCursor = inputText.substring( 0,
+                            cursorOffset +
+                                    inputTextOffset -
+                                    1 );
                     String afterCursor = cursorOffset < inputText.length() ?
-                            inputText.substring( cursorOffset + inputTextOffset, inputText.length() ) : "";
+                            inputText.substring(
+                                    cursorOffset +
+                                            inputTextOffset, inputText
+                                    .length() ) : "";
 
-                    inputText = beforeCursor + afterCursor;
+                    commandPromptController.setInputText(
+                            beforeCursor +
+                                    afterCursor );
                     cursorOffset--;
                 }
             }
@@ -256,9 +286,14 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
             {
                 String beforeCursor = inputText.substring( 0, cursorOffset );
                 String afterCursor = cursorOffset < inputText.length() ?
-                        this.inputText.substring( cursorOffset + 1, inputText.length() ) : "";
+                        inputText.substring(
+                                cursorOffset +
+                                        1, inputText
+                                .length() ) : "";
 
-                inputText = beforeCursor + afterCursor;
+                commandPromptController.setInputText(
+                        beforeCursor +
+                                afterCursor );
             }
         }
         else if (key == Input.KEY_LEFT)
@@ -297,6 +332,13 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
 
             drawCursor = true;
         }
+        else if (key == Input.KEY_ENTER || key == Input.KEY_NUMPADENTER)
+        {
+            commandPromptController.submitInput();
+            if(outputScrollOffset > - (outputText.size() - gridHeight ) )
+                outputScrollOffset = - (outputText.size() - gridHeight );
+
+        }
     }
 
     public void keyReleased( int key, char c )
@@ -328,7 +370,9 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
     {
         if ( change > 0 )
         {
-            if(outputScrollOffset > -outputText.size())
+            final ArrayList<String> outputList = commandPromptController.getOutputList();
+
+            if(outputScrollOffset > - outputList.size())
             {
                 outputScrollOffset--;
             }
@@ -338,41 +382,5 @@ public class CommandTextGrid implements Window.IWindowContent, IScrollListener, 
             if(outputScrollOffset <= 0  )
                 outputScrollOffset++;
         }
-    }
-
-    @Override
-    public void SetOutputText( ArrayList<String> Output )
-    {
-        this.outputText = Output;
-    }
-
-    @Override
-    public ArrayList<String> GetOutputText()
-    {
-        return outputText;
-    }
-
-    @Override
-    public void SetInputText( String Text )
-    {
-        this.inputText = Text;
-    }
-
-    @Override
-    public String GetInputText()
-    {
-        return inputText;
-    }
-
-    @Override
-    public void setInputPrefix(String text)
-    {
-        this.inputText = text;
-    }
-
-    @Override
-    public String getInputPrefix()
-    {
-        return inputText;
     }
 }

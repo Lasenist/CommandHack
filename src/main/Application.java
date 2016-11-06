@@ -46,7 +46,7 @@ public class Application extends StateBasedGame
         try
         {
             AppGameContainer app = new AppGameContainer( new Application( "Command Hack " + VERSION ) );
-            app.setDisplayMode( WIDTH, HEIGHT, true );
+            app.setDisplayMode( WIDTH, HEIGHT, false );
             app.setTargetFrameRate( FPS );
             app.setVSync( true );
             app.setShowFPS( false );

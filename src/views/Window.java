@@ -30,12 +30,12 @@ public class Window implements IComponent, KeyListener, MouseListener
     private boolean hasFocus;
     private boolean beingDragged;
 
-    public Window( IWindowContent Component ) throws SlickException
+    public Window( IWindowContent Component, float x, float y ) throws SlickException
     {
         this.height = 343;
         this.width = 677;
-        this.x = 50;
-        this.y = 30;
+        this.x = x;
+        this.y = y;
         this.windowOutline = new Rectangle( this.x, this.y, this.width, this.height );
         this.header = new Rectangle( this.x, this.y, this.width, 25 );
         this.headerFill = new Rectangle( this.x, this.y, this.width - 1, 25 - 1 );
