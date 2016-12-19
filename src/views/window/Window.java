@@ -1,4 +1,4 @@
-package views;
+package views.window;
 
 import org.newdawn.slick.*;
 import org.newdawn.slick.Color;
@@ -7,6 +7,7 @@ import org.newdawn.slick.geom.*;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import main.Application;
+import views.IComponent;
 import views.util.Fonts;
 import views.util.InputNotifier;
 import views.util.ShapeUtil;
@@ -14,7 +15,8 @@ import views.util.ShapeUtil;
 /**
  * Created by Lasen on 08/09/16.
  */
-public class Window implements IComponent, KeyListener, MouseListener
+public class Window implements
+        IComponent, KeyListener, MouseListener
 {
     private float x;
     private float y;

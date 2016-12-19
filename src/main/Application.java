@@ -20,7 +20,7 @@ public class Application extends StateBasedGame
     // Application Properties
     public static final int WIDTH = 1920;
     public static final int HEIGHT = 1080;
-    public static final int FPS = 60;
+    public static final int FPS = 120;
     public static final double VERSION = 1.0;
 
     public static MouseCursor MOUSE_CURSOR = new MouseCursor();

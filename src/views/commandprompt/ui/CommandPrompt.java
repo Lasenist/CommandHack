@@ -1,4 +1,4 @@
-package views.commandprompt;
+package views.commandprompt.ui;
 
 import main.Application;
 import org.newdawn.slick.*;
@@ -6,7 +6,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
-import views.Window;
+import views.window.Window;
 import views.commandprompt.interfaces.ICommandPromptController;
 import views.mouse.IScrollListener;
 import views.util.Fonts;
@@ -22,8 +22,7 @@ import java.util.ArrayList;
 public class CommandPrompt implements
         Window.IWindowContent, IScrollListener, KeyListener
 {
-    private ICommandPromptController
-            commandPromptController;
+    private ICommandPromptController commandPromptController;
 
     private UnicodeFont font;
     private int charHeight;
@@ -69,9 +68,7 @@ public class CommandPrompt implements
         cursorBlinkTimer.setRepeats( true );
         cursorBlinkTimer.start();
 
-        System.out.println(
-                14 +
-                        sizeOffset );
+        System.out.println( 14 + sizeOffset );
     }
 
 
@@ -175,6 +172,9 @@ public class CommandPrompt implements
         if(cursorOffset > inputText.length())
             cursorOffset = 0;
 
+        if(inputTextOffset > inputText.length())
+            inputTextOffset = 0;
+
         if( ShapeUtil.isContaineeInsideContainer( new Rectangle( this.x, this.y, this.width, this.height ),
                 Application.MOUSE_CURSOR.mouseHitbox))
         {
@@ -240,21 +240,13 @@ public class CommandPrompt implements
         final String inputPrefix = commandPromptController.getInputPrefix();
         final ArrayList<String> outputText = commandPromptController.getOutputList();
 
-        if( Character.isLetterOrDigit( c ) || key == Input.KEY_SPACE)
+        if( Character.isLetterOrDigit( c ) || key == Input.KEY_SPACE || key == Input.KEY_SLASH)
         {
-            String beforeCursor = inputText.substring( 0,
-                    cursorOffset +
-                            inputTextOffset );
+            String beforeCursor = inputText.substring( 0, cursorOffset + inputTextOffset );
             String afterCursor = cursorOffset < inputText.length() ?
-                    inputText.substring(
-                            cursorOffset +
-                                    inputTextOffset, inputText
-                            .length() ) : "";
+                    inputText.substring( cursorOffset + inputTextOffset, inputText.length() ) : "";
 
-            commandPromptController.setInputText(
-                    beforeCursor +
-                            c +
-                            afterCursor );
+            commandPromptController.setInputText( beforeCursor + c + afterCursor );
             incrementCursorOffset();
         }
         else if(key == Input.KEY_BACK)
@@ -263,37 +255,25 @@ public class CommandPrompt implements
             {
                 if(cursorOffset > 0)
                 {
-                    String beforeCursor = inputText.substring( 0,
-                            cursorOffset +
-                                    inputTextOffset -
-                                    1 );
+                    String beforeCursor = inputText.substring( 0, cursorOffset + inputTextOffset - 1 );
                     String afterCursor = cursorOffset < inputText.length() ?
-                            inputText.substring(
-                                    cursorOffset +
-                                            inputTextOffset, inputText
-                                    .length() ) : "";
+                            inputText.substring( cursorOffset + inputTextOffset, inputText.length() ) : "";
 
-                    commandPromptController.setInputText(
-                            beforeCursor +
-                                    afterCursor );
+                    commandPromptController.setInputText( beforeCursor +afterCursor );
                     cursorOffset--;
                 }
             }
         }
         else if (key == Input.KEY_DELETE)
         {
-            if(cursorOffset < inputText.length())
+            if(cursorOffset < (inputText.length() - inputTextOffset))
             {
-                String beforeCursor = inputText.substring( 0, cursorOffset );
-                String afterCursor = cursorOffset < inputText.length() ?
-                        inputText.substring(
-                                cursorOffset +
-                                        1, inputText
-                                .length() ) : "";
+                int trueCursorPosition = cursorOffset + inputTextOffset;
 
-                commandPromptController.setInputText(
-                        beforeCursor +
-                                afterCursor );
+                String beforeCursor = inputText.substring( 0, trueCursorPosition );
+                String afterCursor = inputText.substring( trueCursorPosition + 1, inputText.length() );
+
+                commandPromptController.setInputText( beforeCursor + afterCursor );
             }
         }
         else if (key == Input.KEY_LEFT)
