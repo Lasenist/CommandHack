@@ -1,22 +1,21 @@
-package views.os.cmdline.viewmodel;
+package views.computer.viewmodel;
 
 import objects.Property;
 import views.base.BaseViewModel;
-import views.commandprompt.commands.interfaces.TestShellCommand;
 import views.commandprompt.interfaces.ICommandPromptViewModel;
 import views.commandprompt.viewmodels.CommandPromptViewModel;
 import views.commandprompt.commands.ShellCommands;
-import views.os.cmdline.enums.ComputerProperties;
-import views.os.cmdline.interfaces.IComputerViewModel;
-import views.os.cmdline.interfaces.IFolderViewModel;
+import views.computer.enums.ComputerProperties;
+import views.computer.interfaces.IComputerViewModel;
+import views.computer.interfaces.IFolderViewModel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Created by Lasen on 07/11/16.
  */
-public class ComputerViewModel extends BaseViewModel<ComputerProperties> implements IComputerViewModel
+public class ComputerViewModel extends BaseViewModel<ComputerProperties> implements
+        IComputerViewModel
 {
     private HashMap<String, IFolderViewModel> folders;
     private IFolderViewModel currentFolder;

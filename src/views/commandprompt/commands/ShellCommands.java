@@ -3,7 +3,7 @@ package views.commandprompt.commands;
 
 import views.commandprompt.commands.interfaces.IShellCommand;
 import views.commandprompt.interfaces.ICommandPromptViewModel;
-import views.os.cmdline.interfaces.IComputerViewModel;
+import views.computer.interfaces.IComputerViewModel;
 
 /**
  * Created by Lasen on 18/12/16.

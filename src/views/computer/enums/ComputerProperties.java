@@ -1,4 +1,4 @@
-package views.os.cmdline.enums;
+package views.computer.enums;
 
 /**
  * Created by Lasen on 07/11/16.

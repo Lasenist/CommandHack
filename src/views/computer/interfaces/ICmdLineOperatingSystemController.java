@@ -1,4 +1,4 @@
-package views.os.cmdline.interfaces;
+package views.computer.interfaces;
 
 import views.base.interfaces.IBaseController;
 import views.commandprompt.interfaces.ICommandPromptController;

@@ -1,7 +1,7 @@
-package views.os.cmdline.viewmodel;
+package views.computer.viewmodel;
 
 import views.base.BaseViewModel;
-import views.os.cmdline.interfaces.IFolderViewModel;
+import views.computer.interfaces.IFolderViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;

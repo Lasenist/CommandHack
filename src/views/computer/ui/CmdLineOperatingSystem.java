@@ -1,10 +1,10 @@
-package views.os.cmdline.ui;
+package views.computer.ui;
 
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import views.IComponent;
 import views.commandprompt.ui.CommandPrompt;
-import views.os.cmdline.interfaces.ICmdLineOperatingSystemController;
+import views.computer.interfaces.ICmdLineOperatingSystemController;
 import views.util.InputNotifier;
 
 /**
@@ -12,7 +12,8 @@ import views.util.InputNotifier;
  */
 public class CmdLineOperatingSystem implements IComponent
 {
-    private ICmdLineOperatingSystemController controller;
+    private ICmdLineOperatingSystemController
+            controller;
 
     private CommandPrompt commandPrompt;
 

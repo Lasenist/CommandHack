@@ -1,11 +1,9 @@
-package views.os.cmdline.interfaces;
+package views.computer.interfaces;
 
 import views.base.interfaces.IBaseViewModel;
 import views.commandprompt.interfaces.ICommandPromptViewModel;
-import views.os.cmdline.enums.ComputerProperties;
-import views.os.cmdline.viewmodel.FolderViewModel;
+import views.computer.enums.ComputerProperties;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**

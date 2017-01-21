@@ -1,4 +1,4 @@
-package views.os.cmdline.interfaces;
+package views.computer.interfaces;
 
 import java.util.ArrayList;
 import java.util.HashMap;

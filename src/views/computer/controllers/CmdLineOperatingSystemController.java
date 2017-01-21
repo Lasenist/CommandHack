@@ -1,19 +1,20 @@
-package views.os.cmdline.controllers;
+package views.computer.controllers;
 
 import views.base.BaseController;
 import views.commandprompt.bindings.CommandPromptBinding;
 import views.commandprompt.interfaces.ICommandPromptController;
 import views.commandprompt.interfaces.ICommandPromptViewModel;
-import views.os.cmdline.enums.ComputerProperties;
-import views.os.cmdline.interfaces.ICmdLineOperatingSystemController;
-import views.os.cmdline.interfaces.IComputerViewModel;
+import views.computer.enums.ComputerProperties;
+import views.computer.interfaces.ICmdLineOperatingSystemController;
+import views.computer.interfaces.IComputerViewModel;
 
 /**
  * Created by Lasen on 06/11/16.
  */
 public class CmdLineOperatingSystemController
         extends BaseController<ComputerProperties, IComputerViewModel>
-        implements ICmdLineOperatingSystemController
+        implements
+        ICmdLineOperatingSystemController
 {
     private CommandPromptBinding commandPrompt;
 

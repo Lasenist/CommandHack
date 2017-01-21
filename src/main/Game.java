@@ -1,20 +1,16 @@
 package main;
 
 import org.newdawn.slick.util.Log;
-import views.commandprompt.ui.CommandPrompt;
-import views.commandprompt.controllers.CommandPromptController;
-import views.commandprompt.viewmodels.CommandPromptViewModel;
-import views.os.cmdline.controllers.CmdLineOperatingSystemController;
-import views.os.cmdline.ui.CmdLineOperatingSystem;
+import views.computer.controllers.CmdLineOperatingSystemController;
+import views.computer.ui.CmdLineOperatingSystem;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
-import views.os.cmdline.viewmodel.ComputerViewModel;
+import views.computer.viewmodel.ComputerViewModel;
 import views.util.InputNotifier;
 import views.util.ShaderProgram;
-import views.window.Window;
 
 /**
  * Created by Lasen on 06/09/16.
