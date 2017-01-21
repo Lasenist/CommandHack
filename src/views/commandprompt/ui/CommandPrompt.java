@@ -37,9 +37,7 @@ public class CommandPrompt implements
     private int width;
 
     private boolean isListeningToMouseScroll;
-    private int outputScrollOffset;
 
-    private int cursorOffset;
     private int inputTextOffset;
 
     private boolean drawCursor;
@@ -64,7 +62,7 @@ public class CommandPrompt implements
             sizeOffset++;
         }
 
-        Timer cursorBlinkTimer = new Timer( 1000, e -> drawCursor = ! drawCursor );
+        Timer cursorBlinkTimer = new Timer( 200, e -> drawCursor = ! drawCursor );
         cursorBlinkTimer.setRepeats( true );
         cursorBlinkTimer.start();
 
@@ -93,6 +91,7 @@ public class CommandPrompt implements
     private void renderOutputText()
     {
         final ArrayList<String> outputList = commandPromptController.getOutputList();
+        final int outputScrollOffset = commandPromptController.getOutputListOffset();
 
         for ( int x = 0; x < gridWidth; x++ )
         {
@@ -106,7 +105,7 @@ public class CommandPrompt implements
                     character = String.valueOf( line.toCharArray()[x] );
 
                 final float actualX = this.x + ( x * charWidth );
-                final float actualY = this.y + ( y * charHeight ) + ( outputScrollOffset * charHeight );
+                final float actualY = ((gridHeight * charHeight) - this.y) + ( y * charHeight ) + ( outputScrollOffset * charHeight );
 
                 if(isInsideOutputTextArea( actualX, actualY))
                     font.drawString( actualX, actualY, character);
@@ -118,6 +117,7 @@ public class CommandPrompt implements
     {
         final String inputPrefix = commandPromptController.getInputPrefix();
         final String inputText = commandPromptController.getInputText();
+        final int cursorOffset = commandPromptController.getCursorOffset();
 
         final String bottomRow =  inputPrefix + inputText;
 
@@ -163,6 +163,7 @@ public class CommandPrompt implements
         commandPromptController.update();
 
         final String inputText = commandPromptController.getInputText();
+        final int cursorOffset = commandPromptController.getCursorOffset();
 
         this.charWidth = font.getWidth( "a" );
         this.charHeight = font.getHeight( "a" ) + VERTICAL_MARGIN;
@@ -170,7 +171,7 @@ public class CommandPrompt implements
         this.gridHeight = (height / charHeight) - 1;
 
         if(cursorOffset > inputText.length())
-            cursorOffset = 0;
+            commandPromptController.setCursorOffset( 0 );
 
         if(inputTextOffset > inputText.length())
             inputTextOffset = 0;
@@ -198,10 +199,11 @@ public class CommandPrompt implements
     {
         final String inputText = commandPromptController.getInputText();
         final String inputPrefix = commandPromptController.getInputPrefix();
+        final int cursorOffset = commandPromptController.getCursorOffset();
 
         if(cursorOffset < inputText.length() - inputTextOffset && cursorOffset < gridWidth - inputPrefix.length())
         {
-            cursorOffset++;
+            commandPromptController.setCursorOffset( cursorOffset + 1 );
         }
         else if (cursorOffset == (gridWidth - inputPrefix.length()) && inputPrefix.length() + inputText.length() - inputTextOffset > gridWidth)
         {
@@ -239,8 +241,9 @@ public class CommandPrompt implements
         final String inputText = commandPromptController.getInputText();
         final String inputPrefix = commandPromptController.getInputPrefix();
         final ArrayList<String> outputText = commandPromptController.getOutputList();
+        final int cursorOffset = commandPromptController.getCursorOffset();
 
-        if( Character.isLetterOrDigit( c ) || key == Input.KEY_SPACE || key == Input.KEY_SLASH)
+        if( Character.isLetterOrDigit( c ) || key == Input.KEY_SPACE || key == Input.KEY_SLASH || key == Input.KEY_PERIOD)
         {
             String beforeCursor = inputText.substring( 0, cursorOffset + inputTextOffset );
             String afterCursor = cursorOffset < inputText.length() ?
@@ -260,7 +263,7 @@ public class CommandPrompt implements
                             inputText.substring( cursorOffset + inputTextOffset, inputText.length() ) : "";
 
                     commandPromptController.setInputText( beforeCursor +afterCursor );
-                    cursorOffset--;
+                    commandPromptController.setCursorOffset( cursorOffset - 1 );
                 }
             }
         }
@@ -280,7 +283,7 @@ public class CommandPrompt implements
         {
             if(cursorOffset > 0)
             {
-                cursorOffset--;
+                commandPromptController.setCursorOffset( cursorOffset - 1 );
             }
             else if (inputTextOffset > 0)
             {
@@ -295,13 +298,13 @@ public class CommandPrompt implements
         }
         else if (key == Input.KEY_HOME)
         {
-            cursorOffset = 0;
+            commandPromptController.setCursorOffset( 0 );
             inputTextOffset = 0;
             drawCursor = true;
         }
         else if (key == Input.KEY_END)
         {
-            cursorOffset = inputText.length() > gridWidth - inputPrefix.length() ? gridWidth - inputPrefix.length() : inputText.length();
+            commandPromptController.setCursorOffset( inputText.length() > gridWidth - inputPrefix.length() ? gridWidth - inputPrefix.length() : inputText.length() );
 
             inputTextOffset = inputText.length() - (gridWidth - inputPrefix.length());
 
@@ -315,9 +318,12 @@ public class CommandPrompt implements
         else if (key == Input.KEY_ENTER || key == Input.KEY_NUMPADENTER)
         {
             commandPromptController.submitInput();
-            if(outputScrollOffset > - (outputText.size() - gridHeight ) )
-                outputScrollOffset = - (outputText.size() - gridHeight );
-
+            commandPromptController.setOutputListOffset( -outputText.size() );
+        }
+        else if (key == Input.KEY_TAB)
+        {
+            commandPromptController.outputAutoComplete();
+            drawCursor = true;
         }
     }
 
@@ -348,19 +354,21 @@ public class CommandPrompt implements
 
     public void ScrollChanged( int change )
     {
+        final int outputScrollOffset = commandPromptController.getOutputListOffset();
+
         if ( change > 0 )
         {
             final ArrayList<String> outputList = commandPromptController.getOutputList();
 
             if(outputScrollOffset > - outputList.size())
             {
-                outputScrollOffset--;
+                commandPromptController.setOutputListOffset( outputScrollOffset - 1 );
             }
         }
         else if ( change < 0 )
         {
             if(outputScrollOffset <= 0  )
-                outputScrollOffset++;
+                commandPromptController.setOutputListOffset( outputScrollOffset + 1 );
         }
     }
 }

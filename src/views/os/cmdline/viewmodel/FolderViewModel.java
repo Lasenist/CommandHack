@@ -25,6 +25,9 @@ public class FolderViewModel extends BaseViewModel implements IFolderViewModel
     {
         this(name);
         this.parentFolder = parentFolder;
+        this.folders = new HashMap<>();
+
+        folders.put( "..", parentFolder );
     }
 
     @Override

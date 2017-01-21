@@ -5,11 +5,7 @@ import views.commandprompt.interfaces.ICommandPromptViewModel;
 import views.os.cmdline.interfaces.IComputerViewModel;
 import views.os.cmdline.interfaces.IFolderViewModel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Created by Lasen on 18/12/16.
@@ -40,62 +36,76 @@ public class ChangeDirectoryShellCommand implements IShellCommand
         if(inputArray.length == 2)
         {
             String[] folderSequence = inputArray[1].split( "/" );
-
-            if(folderSequence.length == 0)
-            {
-                computerViewModel.navigateToFolder( null );
-            }
-            else if( Objects.equals( folderSequence[0], "" ))
-            {
-                navigateToFolderFromFullPath( folderSequence );
-            }
-            else
-            {
-                ArrayList<String> fullFolderSequence = new ArrayList<>();
-                fullFolderSequence.add( "" );
-                IFolderViewModel currentFolder = computerViewModel.getCurrentFolder();
-
-                if(currentFolder != null)
-                {
-                    fullFolderSequence.addAll( currentFolder.getPath().stream().collect( Collectors.toList() ) );
-                    Collections.addAll( fullFolderSequence, folderSequence );
-                }
-                else
-                {
-                    Collections.addAll( fullFolderSequence, folderSequence );
-                }
-
-                navigateToFolderFromFullPath( fullFolderSequence.toArray( new String[fullFolderSequence
-                        .size()] ) );
-            }
+            navigateToFolder( folderSequence );
         }
     }
 
-    private void navigateToFolderFromFullPath( String[] folderSequence )
+    @Override
+    public void autoComplete( String[] inputArray )
     {
-        Boolean isNavigateSuccesfull = false;
-        HashMap<String, IFolderViewModel> folders = computerViewModel.getFolders();
-        for(int i = 1; i < folderSequence.length; i++)
+        if(inputArray.length == 1)
         {
-            if(folders.containsKey( folderSequence[i] ))
+            IFolderViewModel folderViewModel = computerViewModel.getCurrentFolder();
+            ArrayList<String> outputList = commandPromptViewModel.getOutputList();
+            folderViewModel.getContainingFolders().keySet().forEach( outputList::add );
+            commandPromptViewModel.setOutputList( outputList );
+            commandPromptViewModel.setOutputListOffset( commandPromptViewModel.getOutputListOffset() - folderViewModel.getContainingFolders().size() );
+        }
+        else if(inputArray.length >= 2)
+        {
+            String[] folderSequence = inputArray[1].split( "/" );
+            IFolderViewModel folder = getFolder( folderSequence );
+
+
+            //TODO:
+            IFolderViewModel folderViewModel = computerViewModel.getCurrentFolder();
+            ArrayList<String> outputList = commandPromptViewModel.getOutputList();
+            folder.getContainingFolders().keySet().forEach( outputList::add );
+            commandPromptViewModel.setOutputList( outputList );
+            commandPromptViewModel.setOutputListOffset( commandPromptViewModel.getOutputListOffset() - folderViewModel.getContainingFolders().size() );
+        }
+    }
+
+    private void navigateToFolder( String[] pathSequence )
+    {
+        IFolderViewModel currentFolder = getFolder( pathSequence );
+
+        if(currentFolder == null)
+        {
+            commandPromptViewModel.getOutputList().add( "cd: " + currentInput[1] + ": No such file or directory" );
+        }
+        else
+        {
+            computerViewModel.setCurrentFolder( currentFolder );
+        }
+    }
+
+    private IFolderViewModel getFolder(String[] pathSequence)
+    {
+        HashMap<String, IFolderViewModel> folders = null;
+
+        folders = Objects.equals( pathSequence[0], "" ) ? computerViewModel.getRootFolder().getContainingFolders() : computerViewModel.getCurrentFolder().getContainingFolders();
+
+        IFolderViewModel currentFolder = null;
+        Boolean isNavigationSuccessful = false;
+
+        for(int i = 0; i < pathSequence.length; i++)
+        {
+            if(folders.containsKey( pathSequence[i] ))
             {
-                if(i == folderSequence.length - 1)
+                if(i == pathSequence.length - 1)
                 {
-                    IFolderViewModel folderViewModel = folders.get( folderSequence[i] );
-                    computerViewModel.navigateToFolder(folderViewModel);
-                    isNavigateSuccesfull = true;
+                    currentFolder = folders.get( pathSequence[i] );
+                    isNavigationSuccessful = true;
                     break;
                 }
                 else
                 {
-                    folders = folders.get( folderSequence[i] ).getContainingFolders();
+                    currentFolder = folders.get( pathSequence[i] );
+                    folders = currentFolder.getContainingFolders();
                 }
             }
         }
-
-        if(!isNavigateSuccesfull)
-        {
-            commandPromptViewModel.getOutputList().add( "cd: " + currentInput[1] + ": No such file or directory" );
-        }
+        return isNavigationSuccessful ? currentFolder : null;
     }
 }

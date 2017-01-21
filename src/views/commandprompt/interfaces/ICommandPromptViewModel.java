@@ -13,8 +13,14 @@ public interface ICommandPromptViewModel extends IBaseViewModel<CommandPromptPro
     void setInputText( String Text );
     String getInputText();
 
-    void setInputPrefix(String text);
+    void setInputPrefix( String text );
     String getInputPrefix();
+
+    void setCursorOffset( int value );
+    int getCursorOffset();
+
+    void setOutputListOffset( int value );
+    int getOutputListOffset();
 
     void submitInput();
     void outputAutoComplete();

@@ -19,7 +19,8 @@ public interface IComputerViewModel extends IBaseViewModel<ComputerProperties>
 
     HashMap<String, IFolderViewModel> getFolders();
 
-    void navigateToFolder( IFolderViewModel folder );
+    void setCurrentFolder( IFolderViewModel folderViewModel );
 
     IFolderViewModel getCurrentFolder();
+    IFolderViewModel getRootFolder();
 }

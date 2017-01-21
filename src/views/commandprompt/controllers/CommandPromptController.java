@@ -19,6 +19,8 @@ public class CommandPromptController extends BaseController<CommandPromptPropert
     private Binding<ArrayList<String>> outputList;
     private Binding<String> inputPrefix;
     private Binding<String> inputText;
+    private Binding<Integer> cursorOffset;
+    private Binding<Integer> outputListOffset;
 
     public CommandPromptController( ICommandPromptViewModel commandPromptModel )
     {
@@ -27,10 +29,14 @@ public class CommandPromptController extends BaseController<CommandPromptPropert
         outputList = new Binding<>( commandPromptModel.getOutputList() );
         inputPrefix = new Binding<>( commandPromptModel.getInputPrefix() );
         inputText = new Binding<>( commandPromptModel.getInputText() );
+        cursorOffset = new Binding<>( commandPromptModel.getCursorOffset() );
+        outputListOffset = new Binding<>( commandPromptModel.getOutputListOffset() );
 
         registerProperty( CommandPromptProperties.OUTPUT_LIST, outputList );
         registerProperty( CommandPromptProperties.INPUT_TEXT, inputText );
         registerProperty( CommandPromptProperties.INPUT_PREFIX, inputPrefix );
+        registerProperty( CommandPromptProperties.CURSOR_OFFSET, cursorOffset );
+        registerProperty( CommandPromptProperties.OUTPUT_LIST_OFFSET, outputListOffset );
     }
 
     @Override
@@ -73,8 +79,40 @@ public class CommandPromptController extends BaseController<CommandPromptPropert
     }
 
     @Override
+    public void setCursorOffset( int value )
+    {
+        cursorOffset.forceSetValue( value );
+        commandPromptModel.setCursorOffset( value );
+    }
+
+    @Override
+    public int getCursorOffset()
+    {
+        return cursorOffset.getValue();
+    }
+
+    @Override
+    public void setOutputListOffset( int value )
+    {
+        outputListOffset.forceSetValue( value );
+        commandPromptModel.setOutputListOffset( value );
+    }
+
+    @Override
+    public int getOutputListOffset()
+    {
+        return outputListOffset.getValue();
+    }
+
+    @Override
     public void submitInput()
     {
         commandPromptModel.submitInput();
+    }
+
+    @Override
+    public void outputAutoComplete()
+    {
+        commandPromptModel.outputAutoComplete();
     }
 }

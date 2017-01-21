@@ -8,5 +8,7 @@ public enum CommandPromptProperties
 {
     OUTPUT_LIST,
     INPUT_PREFIX,
-    INPUT_TEXT
+    INPUT_TEXT,
+    CURSOR_OFFSET,
+    OUTPUT_LIST_OFFSET
 }

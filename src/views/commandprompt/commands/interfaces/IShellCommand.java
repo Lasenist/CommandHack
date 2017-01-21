@@ -8,4 +8,6 @@ public interface IShellCommand
     String getIdentifier();
 
     void execute( String[] inputArray );
+
+    void autoComplete( String[] inputArray );
 }

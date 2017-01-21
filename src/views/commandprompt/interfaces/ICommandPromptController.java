@@ -18,5 +18,12 @@ public interface ICommandPromptController extends IBaseController
     void setInputPrefix(String text);
     String getInputPrefix();
 
+    void setCursorOffset( int value );
+    int getCursorOffset();
+
+    void setOutputListOffset( int value );
+    int getOutputListOffset();
+
     void submitInput();
+    void outputAutoComplete();
 }

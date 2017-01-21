@@ -2,6 +2,7 @@ package views.os.cmdline.viewmodel;
 
 import objects.Property;
 import views.base.BaseViewModel;
+import views.commandprompt.commands.interfaces.TestShellCommand;
 import views.commandprompt.interfaces.ICommandPromptViewModel;
 import views.commandprompt.viewmodels.CommandPromptViewModel;
 import views.commandprompt.commands.ShellCommands;
@@ -19,6 +20,7 @@ public class ComputerViewModel extends BaseViewModel<ComputerProperties> impleme
 {
     private HashMap<String, IFolderViewModel> folders;
     private IFolderViewModel currentFolder;
+    private IFolderViewModel rootFolder;
 
     private Property<ICommandPromptViewModel, ComputerProperties> commandPromptViewModelProperty;
 
@@ -30,12 +32,14 @@ public class ComputerViewModel extends BaseViewModel<ComputerProperties> impleme
         commandPromptViewModelProperty = new Property<>( cmdPromptVM, ComputerProperties.COMMAND_PROMPT );
 
         folders = new HashMap<>();
-        FolderViewModel folderViewModel = new FolderViewModel( "test" );
+        rootFolder = new RootFolderViewModel( this );
+
+        FolderViewModel folderViewModel = new FolderViewModel( "test", rootFolder );
         folderViewModel.addFolder( new FolderViewModel( "testing", folderViewModel ) );
         folders.put( folderViewModel.getName(), folderViewModel );
 
-        registerProperty( ComputerProperties.COMMAND_PROMPT, commandPromptViewModelProperty );
 
+        registerProperty( ComputerProperties.COMMAND_PROMPT, commandPromptViewModelProperty );
     }
 
     @Override
@@ -56,39 +60,30 @@ public class ComputerViewModel extends BaseViewModel<ComputerProperties> impleme
     }
 
     @Override
-    public void navigateToFolder( IFolderViewModel folder )
+    public void setCurrentFolder( IFolderViewModel folderViewModel )
     {
+        this.currentFolder = folderViewModel;
+
         String path = "";
-        if(folder != null)
+        Boolean hasPath = false;
+        for(String folder : currentFolder.getPath())
         {
-            ArrayList<String> folderList = folder.getPath();
-            IFolderViewModel currentFolder = null;
-            HashMap<String, IFolderViewModel> currentFolderToSearch = folders;
-            for(String folderName : folderList)
-            {
-                if(currentFolderToSearch.containsKey( folderName ))
-                {
-                    currentFolder = currentFolderToSearch.get( folderName );
-                    currentFolderToSearch = currentFolder.getContainingFolders();
-                    path = path + "/" + currentFolder.getName();
-                }
-                else
-                {
-                    System.out.println( "Unable to find folder" );
-                }
-            }
-            this.currentFolder = currentFolder;
+            path = path + "/" + folder;
+            hasPath = true;
         }
-        else
-        {
-            this.currentFolder = null;
-        }
-        commandPromptViewModelProperty.getValue().setInputPrefix( "lasen@127.0.0.1:" + path + "$ " );
+        path = hasPath ? path : "/";
+        getCommandPromptProperty().setInputPrefix( "lasen@localhost:" +  path + "$" );
     }
 
     @Override
     public IFolderViewModel getCurrentFolder()
     {
-        return currentFolder;
+        return currentFolder != null ? currentFolder : rootFolder;
+    }
+
+    @Override
+    public IFolderViewModel getRootFolder()
+    {
+        return rootFolder;
     }
 }
