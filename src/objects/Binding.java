@@ -21,7 +21,7 @@ public class Binding<TValue>
 
     public void forceSetValue( TValue value)
     {
-        this.newValue = value;
+        setNewValue( value );
         this.value = value;
     }
 
@@ -35,4 +35,8 @@ public class Binding<TValue>
         this.value = newValue;
     }
 
+    public boolean hasValueChanged()
+    {
+        return value != newValue;
+    }
 }

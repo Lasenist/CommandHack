@@ -6,6 +6,7 @@ package objects;
 public abstract class ConverterBinding<TValue, UConvertedValue> extends Binding<TValue>
 {
     protected UConvertedValue convertedValue;
+    protected Boolean isConvertedValueInvalid;
 
     public ConverterBinding( TValue defaultValue )
     {
@@ -13,4 +14,10 @@ public abstract class ConverterBinding<TValue, UConvertedValue> extends Binding<
     }
 
     public abstract UConvertedValue getConvertedValue();
+
+    public void setNewValue( TValue value )
+    {
+        super.setNewValue( value );
+        isConvertedValueInvalid = true;
+    }
 }

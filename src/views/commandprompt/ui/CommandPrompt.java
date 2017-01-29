@@ -69,6 +69,11 @@ public class CommandPrompt implements
         System.out.println( 14 + sizeOffset );
     }
 
+    public void updateController(ICommandPromptController controller)
+    {
+        this.commandPromptController = controller;
+    }
+
 
     public void render( Graphics g )
     {

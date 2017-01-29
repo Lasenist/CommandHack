@@ -21,10 +21,11 @@ public class CommandPromptBinding extends ConverterBinding<ICommandPromptViewMod
     @Override
     public ICommandPromptController getConvertedValue()
     {
-        if(convertedValue == null)
+        if(convertedValue == null || isConvertedValueInvalid)
         {
             convertedValue = new CommandPromptController( getValue() );
             getValue().addObserver( convertedValue );
+            isConvertedValueInvalid = false;
         }
         return convertedValue;
     }
@@ -40,4 +41,6 @@ public class CommandPromptBinding extends ConverterBinding<ICommandPromptViewMod
         }
         return result;
     }
+
+
 }

@@ -8,11 +8,13 @@ import java.util.Observable;
  */
 public class Property<TValue, UPropertyEnum> extends Observable
 {
+    private TValue defaultValue;
     private TValue value;
     private UPropertyEnum propertyEnum;
 
     public Property( TValue defaultValue, UPropertyEnum propertyEnum )
     {
+        this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.propertyEnum = propertyEnum;
     }
@@ -32,5 +34,10 @@ public class Property<TValue, UPropertyEnum> extends Observable
     public UPropertyEnum getPropertyEnum()
     {
         return propertyEnum;
+    }
+
+    public void setToDefaultValue()
+    {
+        setValue( defaultValue );
     }
 }

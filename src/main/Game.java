@@ -8,6 +8,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
+import views.computer.viewmodel.CmdLineOperatingSystemViewModel;
 import views.computer.viewmodel.ComputerViewModel;
 import views.util.InputNotifier;
 import views.util.ShaderProgram;
@@ -34,9 +35,13 @@ public class Game extends BasicGameState
     {
         gc.getInput().addMouseListener( Application.MOUSE_CURSOR );
         gc.getInput().enableKeyRepeat();
-        gc.getInput().addKeyListener( InputNotifier.getInputNotifier() );
+        gc.getInput().addKeyListener( InputNotifier
+                .getInputNotifier() );
 
-        operatingSystem = new CmdLineOperatingSystem( new CmdLineOperatingSystemController( new ComputerViewModel() ), Application.WIDTH, Application.HEIGHT );
+        ComputerViewModel computerViewModel = new ComputerViewModel( "testmachine" );
+        CmdLineOperatingSystemViewModel commandLineOsViewModel = new CmdLineOperatingSystemViewModel( computerViewModel );
+        CmdLineOperatingSystemController commandLineOsController = new CmdLineOperatingSystemController( commandLineOsViewModel );
+        operatingSystem = new CmdLineOperatingSystem( commandLineOsController, Application.WIDTH, Application.HEIGHT );
 
         supported = ShaderProgram.isSupported();
 

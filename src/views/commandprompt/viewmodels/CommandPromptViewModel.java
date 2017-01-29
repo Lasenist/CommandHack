@@ -2,9 +2,13 @@ package views.commandprompt.viewmodels;
 
 import objects.Property;
 import views.base.BaseViewModel;
+import views.commandprompt.commands.ShellCommands;
+import views.commandprompt.commands.interfaces.IFolderChangeListener;
 import views.commandprompt.enums.CommandPromptProperties;
 import views.commandprompt.interfaces.ICommandPromptViewModel;
 import views.commandprompt.commands.interfaces.IShellCommand;
+import views.computer.interfaces.IConnection;
+import views.computer.interfaces.IFolderViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +19,7 @@ import java.util.stream.Collectors;
  * Created by Lasen on 05/11/16.
  * View model for the command prompt
  */
-public class CommandPromptViewModel extends BaseViewModel<CommandPromptProperties> implements ICommandPromptViewModel
+public class CommandPromptViewModel extends BaseViewModel<CommandPromptProperties> implements ICommandPromptViewModel, IFolderChangeListener
 {
     private Property<ArrayList<String>, CommandPromptProperties> outputList;
     private Property<String, CommandPromptProperties> inputPrefix;
@@ -25,15 +29,23 @@ public class CommandPromptViewModel extends BaseViewModel<CommandPromptPropertie
 
     private HashMap<String,IShellCommand> shellCommands;
 
-    public CommandPromptViewModel()
+    private IConnection localConnection;
+
+    public CommandPromptViewModel(IConnection connection)
     {
+        this.localConnection = connection;
+        this.localConnection.addFolderChangeListener( this );
         outputList = new Property<>( new ArrayList<>(), CommandPromptProperties.OUTPUT_LIST );
-        inputPrefix = new Property<>( "lasen@localhost:/$ ", CommandPromptProperties.INPUT_PREFIX );
+        inputPrefix = new Property<>(  buildInputPrefix(), CommandPromptProperties.INPUT_PREFIX );
         inputText = new Property<>( "", CommandPromptProperties.INPUT_TEXT );
         cursorOffset = new Property<>( 0, CommandPromptProperties.CURSOR_OFFSET );
         outputListOffset = new Property<>( 0, CommandPromptProperties.OUTPUT_LIST_OFFSET );
 
+
         shellCommands = new HashMap<>();
+
+        IShellCommand cdCommand = ShellCommands.createChangeDirectory( localConnection, this );
+        addShellCommand( cdCommand );
 
         registerProperty( outputList.getPropertyEnum(), outputList );
         registerProperty( inputPrefix.getPropertyEnum(), inputPrefix );
@@ -102,13 +114,6 @@ public class CommandPromptViewModel extends BaseViewModel<CommandPromptPropertie
         return outputListOffset.getValue();
     }
 
-    private void outputCurrentInputText()
-    {
-        ArrayList<String> outputTextValue = getOutputList();
-        outputTextValue.add( getInputPrefix() + getInputText() );
-        setOutputListOffset( getOutputListOffset() - 1 );
-    }
-
     @Override
     public void submitInput()
     {
@@ -120,9 +125,7 @@ public class CommandPromptViewModel extends BaseViewModel<CommandPromptPropertie
 
         if(shellCommand == null)
         {
-            getOutputList().add(
-                    command +
-                            ": command not found" );
+            getOutputList().add( command + ": command not found" );
         }
         else
         {
@@ -183,8 +186,26 @@ public class CommandPromptViewModel extends BaseViewModel<CommandPromptPropertie
         }
     }
 
+    @Override
+    public void folderChanged( IFolderViewModel folderViewModel )
+    {
+        setInputPrefix( buildInputPrefix() );
+    }
+
     public void addShellCommand(IShellCommand shellCommand)
     {
         shellCommands.put( shellCommand.getIdentifier(), shellCommand );
+    }
+
+    private void outputCurrentInputText()
+    {
+        ArrayList<String> outputTextValue = getOutputList();
+        outputTextValue.add( getInputPrefix() + getInputText() );
+        setOutputListOffset( getOutputListOffset() - 1 );
+    }
+
+    private String buildInputPrefix()
+    {
+        return  localConnection.getUsername() + "@" + localConnection.getComputerHostname() + ":" + localConnection.getCurrentPath() + "$ ";
     }
 }

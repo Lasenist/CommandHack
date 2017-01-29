@@ -29,7 +29,11 @@ public abstract class BaseController<TPropertyEnum, UViewModel extends IBaseView
 
     public void update()
     {
-        propertyHashMap.values().forEach( Binding::update );
+        propertyHashMap
+                .values()
+                .stream()
+                .filter( Binding::hasValueChanged )
+                .forEach( objects.Binding::update );
     }
 
     public void update( Observable o, Object arg )

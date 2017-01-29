@@ -3,32 +3,27 @@ package views.computer.viewmodel;
 import objects.Property;
 import views.base.BaseViewModel;
 import views.commandprompt.interfaces.ICommandPromptViewModel;
-import views.commandprompt.viewmodels.CommandPromptViewModel;
-import views.commandprompt.commands.ShellCommands;
+import views.commandprompt.viewmodels.LoginCommandPromptViewModel;
 import views.computer.enums.ComputerProperties;
 import views.computer.interfaces.IComputerViewModel;
 import views.computer.interfaces.IFolderViewModel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Created by Lasen on 07/11/16.
  */
-public class ComputerViewModel extends BaseViewModel<ComputerProperties> implements
-        IComputerViewModel
+public class ComputerViewModel extends BaseViewModel<ComputerProperties> implements IComputerViewModel
 {
+    private String hostname;
     private HashMap<String, IFolderViewModel> folders;
-    private IFolderViewModel currentFolder;
     private IFolderViewModel rootFolder;
+    private ArrayList<User> userList;
 
-    private Property<ICommandPromptViewModel, ComputerProperties> commandPromptViewModelProperty;
-
-    public ComputerViewModel()
+    public ComputerViewModel(String hostname)
     {
-        CommandPromptViewModel cmdPromptVM = new CommandPromptViewModel();
-        cmdPromptVM.addShellCommand( ShellCommands.createChangeDirectory(this, cmdPromptVM) );
-
-        commandPromptViewModelProperty = new Property<>( cmdPromptVM, ComputerProperties.COMMAND_PROMPT );
+        this.hostname = hostname;
 
         folders = new HashMap<>();
         rootFolder = new RootFolderViewModel( this );
@@ -37,20 +32,8 @@ public class ComputerViewModel extends BaseViewModel<ComputerProperties> impleme
         folderViewModel.addFolder( new FolderViewModel( "testing", folderViewModel ) );
         folders.put( folderViewModel.getName(), folderViewModel );
 
-
-        registerProperty( ComputerProperties.COMMAND_PROMPT, commandPromptViewModelProperty );
-    }
-
-    @Override
-    public ICommandPromptViewModel getCommandPromptProperty()
-    {
-        return commandPromptViewModelProperty.getValue();
-    }
-
-    @Override
-    public void setCommandPromptProperty( ICommandPromptViewModel commandPromptViewModel )
-    {
-        this.commandPromptViewModelProperty.setValue( commandPromptViewModel );
+        this.userList = new ArrayList<>();
+        userList.add( new User( "admin", "testing" ) );
     }
 
     public HashMap<String, IFolderViewModel> getFolders()
@@ -59,30 +42,26 @@ public class ComputerViewModel extends BaseViewModel<ComputerProperties> impleme
     }
 
     @Override
-    public void setCurrentFolder( IFolderViewModel folderViewModel )
-    {
-        this.currentFolder = folderViewModel;
-
-        String path = "";
-        Boolean hasPath = false;
-        for(String folder : currentFolder.getPath())
-        {
-            path = path + "/" + folder;
-            hasPath = true;
-        }
-        path = hasPath ? path : "/";
-        getCommandPromptProperty().setInputPrefix( "lasen@localhost:" +  path + "$" );
-    }
-
-    @Override
-    public IFolderViewModel getCurrentFolder()
-    {
-        return currentFolder != null ? currentFolder : rootFolder;
-    }
-
-    @Override
     public IFolderViewModel getRootFolder()
     {
         return rootFolder;
+    }
+
+    @Override
+    public String getHostname()
+    {
+        return hostname;
+    }
+
+    @Override
+    public ArrayList<User> getUserList()
+    {
+        return userList;
+    }
+
+    @Override
+    public Connection getNewConnection( User user )
+    {
+        return new Connection(user, this);
     }
 }

@@ -12,8 +12,7 @@ import views.util.InputNotifier;
  */
 public class CmdLineOperatingSystem implements IComponent
 {
-    private ICmdLineOperatingSystemController
-            controller;
+    private ICmdLineOperatingSystemController controller;
 
     private CommandPrompt commandPrompt;
 
@@ -38,6 +37,7 @@ public class CmdLineOperatingSystem implements IComponent
     public void update()
     {
         this.controller.update();
+        this.commandPrompt.updateController( controller.getCommandPrompt() );
         this.commandPrompt.update();
     }
 }
